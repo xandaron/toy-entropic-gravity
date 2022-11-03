@@ -2,7 +2,8 @@ package toy.entropic.gravity;
 import processing.core.*;
 
 public class Model extends PApplet{
-
+	
+	Simulation sim;
 	public static void main(String[] args) {
 		PApplet.main(new String[] {toy.entropic.gravity.Model.class.getName()});
 	}
@@ -15,14 +16,28 @@ public class Model extends PApplet{
     // identical use to setup in Processing IDE except for size()
     public void setup(){
         surface.setTitle("Toy Entropic Gravity");
-        surface.setResizable(true);
         surface.setLocation(10, 10);
+        strokeWeight(1);
+        
+        sim = new Simulation(this, (height - 5) / 2, 100);
     }
 
     // identical use to draw in Prcessing IDE
     public void draw(){
     	background(130);
+    	
     	fill(255);
-    	rect(10, 10, 20, 20);
+    	stroke(0);
+    	circle(width - 5 - sim.getRadius(), height / 2, 2 * sim.getRadius());
+    	
+    	for(Particle p : sim.getParticles()) {
+    		if(p != null) {
+	    		noFill();
+	    		stroke(255,0,0);
+	    		circle(p.getX() + width - 5 - sim.getRadius(), p.getY() + height / 2, p.getR() * 2);
+    		} else {
+    			break;
+    		}
+    	}
     }
 }
