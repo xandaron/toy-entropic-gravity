@@ -49,12 +49,12 @@ public class Simulation {
 			float x1, x2, y1, y2;
 			if(v.x == 1f) {
 				x1 = x;
-				y1 = (float) Math.sqrt(radius*radius - x1*x1);
+				y1 = (float) Math.sqrt(radius*radius - x*x);
 				x2 = x;
 				y2 = -y1;
 			} else if (v.y == 1f) {
 				y1 = y;
-				x1 = (float) Math.sqrt(radius*radius - y1*y1);
+				x1 = (float) Math.sqrt(radius*radius - y*y);
 				y2 = y;
 				x2 = -x1;
 			} else {
@@ -72,17 +72,21 @@ public class Simulation {
 				if(v.x == 1f) {
 					if(p.getX() - p.getR() <= x && x <= p.getX() + p.getR()) {
 						chords[numChords].setExcluded(true);
+						break;
 					}
 				} else if(v.y == 1f) {
 					if(p.getY() - p.getR() <= y && y <= p.getY() + p.getR()) {
 						chords[numChords].setExcluded(true);
+						break;
 					}
 				} else {
-					float a = v.grad()*v.grad() + 1;
+					float a = 1 + v.grad()*v.grad();
 					float b = 2*(p.getX() + v.grad()*(v.inte() + p.getY()));
-					float c = (v.inte() + p.getY())*(v.inte() + p.getY()) - p.getR()*p.getR();
-					if(b*b-4*a*c >= 0) {
+					float c = p.getX()*p.getX() - p.getR()*p.getR() +
+							(v.inte() + p.getY())*(v.inte() + p.getY());
+					if(b*b - 4*a*c >= 0.0f) {
 						chords[numChords].setExcluded(true);
+						break;
 					}
 				}
 			}

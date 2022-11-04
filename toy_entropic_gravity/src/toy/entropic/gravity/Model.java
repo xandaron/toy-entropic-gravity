@@ -19,7 +19,7 @@ public class Model extends PApplet{
         surface.setLocation(10, 10);
         strokeWeight(1);
         
-        sim = new Simulation((height - 10) / 2, 1000, 10);
+        sim = new Simulation((height - 10) / 2, 1000, 2);
         offsetX = width - 5 - sim.getRadius();
         offsetY = height / 2;
     }
@@ -45,5 +45,9 @@ public class Model extends PApplet{
     		stroke(255,0,0);
     		circle(p.getX() + offsetX, p.getY() + offsetY, p.getR() * 2);
     	}
+    	
+    	noFill();
+    	stroke(0);
+    	circle(offsetX, offsetY, 2 * sim.getRadius());
     }
 }
