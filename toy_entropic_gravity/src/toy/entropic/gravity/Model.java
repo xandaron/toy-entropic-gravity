@@ -19,16 +19,16 @@ public class Model extends PApplet{
         surface.setLocation(10, 10);
         strokeWeight(1);
         
-        sim = new Simulation((height - 10) / 2, 1000, 2);
+        sim = new Simulation(height / 2 - 5, 1000, 2);
         offsetX = width - 5 - sim.getRadius();
         offsetY = height / 2;
     }
     
     public void draw(){
     	background(130);
-    	
     	fill(255);
     	stroke(0);
+    	strokeWeight(1);
     	circle(offsetX, offsetY, 2 * sim.getRadius());
     	
     	for(Chord c : sim.getChords()) {
@@ -37,17 +37,19 @@ public class Model extends PApplet{
     		} else {
     			stroke(0);
     		}
-    		line(c.getX1() + offsetX, c.getY1() + offsetY, c.getX2() + offsetX, c.getY2() + offsetY);
+    		line(offsetX + c.getX1(), offsetY + c.getY1(), offsetX + c.getX2(), offsetY + c.getY2());
     	}
     	
     	for(Particle p : sim.getParticles()) {
     		noFill();
+    		strokeWeight(2);
     		stroke(255,0,0);
-    		circle(p.getX() + offsetX, p.getY() + offsetY, p.getR() * 2);
+    		circle(offsetX + p.getX(), offsetY + p.getY(), p.getR() * 2);
     	}
     	
     	noFill();
     	stroke(0);
+    	strokeWeight(1);
     	circle(offsetX, offsetY, 2 * sim.getRadius());
     }
 }

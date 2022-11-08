@@ -21,4 +21,8 @@ public class Particle {
 	public float getR() {
 		return r;
 	}
+	
+	public String eq() {
+		return "(x - " + x + ")^2 + (y - " + y + ")^2 = " + r + "^2";
+	}
 }

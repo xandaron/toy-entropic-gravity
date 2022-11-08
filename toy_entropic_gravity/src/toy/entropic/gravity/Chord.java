@@ -2,13 +2,10 @@ package toy.entropic.gravity;
 
 public class Chord {
 	
-	private Vector2 v;
 	private float X1, X2, Y1, Y2;
 	private boolean excluded;
 	
-	public Chord(Vector2 v, float x1, float y1, float x2, float y2) {
-		this.v = v;
-		
+	public Chord(float x1, float y1, float x2, float y2) {
 		X1 = x1;
 		X2 = x2;
 		Y1 = y1;
@@ -18,11 +15,11 @@ public class Chord {
 	}
 	
 	public float getGradient() {
-		return v.grad();
+		return (Y2 - Y1) / (X2 - X1);
 	}
 	
 	public float getIntercept() {
-		return v.inte();
+		return Y1 - getGradient() * X1;
 	}
 	
 	public boolean isExcluded() {
@@ -47,5 +44,17 @@ public class Chord {
 	
 	public float getY2() {
 		return Y2;
+	}
+	
+	public float getX() {
+		return (X2 - X1) / 2;
+	}
+	
+	public float getY() {
+		return (Y2 - Y1) / 2;
+	}
+	
+	public String eq() {
+		return "y = " + getGradient() + "x + " + getIntercept();
 	}
 }
