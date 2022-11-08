@@ -90,7 +90,6 @@ public class Simulation {
 							(inte - p.getY())*(inte - p.getY());
 					if(b*b - 4*a*c >= 0.0f) {
 						chords[numChords].setExcluded(true);
-						System.out.println(p.eq() + ", " + chords[numChords].eq());
 						break;
 					}
 				}
