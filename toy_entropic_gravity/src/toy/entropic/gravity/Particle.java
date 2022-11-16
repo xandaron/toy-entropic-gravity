@@ -10,6 +10,11 @@ public class Particle {
 		this.r = r;
 	}
 	
+	public void move(float dx, float dy) {
+		x += dx;
+		y += dy;
+	}
+	
 	public float getX() {
 		return x;
 	}

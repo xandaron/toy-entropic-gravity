@@ -98,6 +98,52 @@ public class Simulation {
 		}
 	}
 	
+	public void update() {
+		particleUpdate();
+		exclusionUpdate();
+	}
+	
+	private void particleUpdate() {
+		Random rand = new Random();
+		for(Particle p : particles) {
+			float dx = -5 + rand.nextFloat() * 10;
+			float dy = -5 + rand.nextFloat() * 10;
+			if((p.getX() + dx)*(p.getX() + dx) + (p.getY() + dy)*(p.getY() + dy) <= radius*radius) {
+				p.move(dx, dy);
+			}
+		}
+	}
+	
+	private void exclusionUpdate() {
+		for(Chord c : chords) {
+			c.setExcluded(false);
+			for(Particle p : particles) {
+				if(c.getDY() == 0f) {
+					if(p.getX() - p.getR() <= c.getX1() && c.getX1() <= p.getX() + p.getR()) {
+						c.setExcluded(true);
+						break;
+					}
+				} else if(c.getDX() == 0f) {
+					if(p.getY() - p.getR() <= c.getY1() && c.getY1() <= p.getY() + p.getR()) {
+						c.setExcluded(true);
+						break;
+					}
+				} else {
+					float grad = c.getGradient();
+					float inte = c.getIntercept();
+					float a = 1 + grad*grad;
+					float b = 2*(grad * (inte - p.getY()) - p.getX());
+					float d = p.getX()*p.getX() - p.getR()*p.getR() +
+							(inte - p.getY())*(inte - p.getY());
+					if(b*b - 4*a*d >= 0.0f) {
+						c.setExcluded(true);
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	public Particle[] getParticles() {
 		return particles;
 	}

@@ -46,12 +46,22 @@ public class Chord {
 		return Y2;
 	}
 	
+	// returns the x-coordinate of the midpoint of the chord
 	public float getX() {
-		return (X2 - X1) / 2;
+		return (X2 - X1) / 2 + X1;
 	}
 	
+	// returns the y-coordinate of the midpoint of the chord
 	public float getY() {
-		return (Y2 - Y1) / 2;
+		return (Y2 - Y1) / 2 + Y1;
+	}
+	
+	public float getDX() {
+		return X2 - X1;
+	}
+	
+	public float getDY() {
+		return Y2 - Y1;
 	}
 	
 	public String eq() {
