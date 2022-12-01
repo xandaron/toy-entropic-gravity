@@ -108,7 +108,7 @@ public class Simulation {
 		for(Particle p : particles) {
 			float dx = -5 + rand.nextFloat() * 10;
 			float dy = -5 + rand.nextFloat() * 10;
-			if((p.getX() + dx)*(p.getX() + dx) + (p.getY() + dy)*(p.getY() + dy) <= radius*radius) {
+			if((p.getX()+dx)*(p.getX()+dx) + (p.getY()+dy)*(p.getY()+dy) <= (radius-p.getR())*(radius-p.getR())) {
 				p.move(dx, dy);
 			}
 		}
