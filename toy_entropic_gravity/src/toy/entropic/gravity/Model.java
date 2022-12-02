@@ -9,8 +9,10 @@ public class Model extends PApplet{
 	float offsetX, offsetY;
 	String numParticles = "";
 	String numChords = "";
+	String timeStep = "";
 	boolean numParticlesEdit = false;
 	boolean numChordsEdit = false;
+	boolean timeStepEdit = false;
 	public static void main(String[] args) {
 		PApplet.main(new String[] {toy.entropic.gravity.Model.class.getName()});
 	}
@@ -48,13 +50,14 @@ public class Model extends PApplet{
     	}
     	rect(80, height - 60, 40, 40);
     	
-    	
     	// Input boxes
     	fill(250);
     	if(numParticlesEdit) { stroke(222, 197, 7); } else { stroke(0); }
     	rect(20,20,100,40);
     	if(numChordsEdit) { stroke(222, 197, 7); } else { stroke(0); }
     	rect(140,20,100,40);
+    	if(timeStepEdit) { stroke(222, 197, 7); } else { stroke(0); }
+    	rect(20,height-120,100,40);
     	textAlign(LEFT,CENTER);
     	textSize(20);
     	if(numParticles == "") {
@@ -71,13 +74,22 @@ public class Model extends PApplet{
     		fill(0);
     		text(numChords,145,20,100,40);
     	}
+    	if(timeStep == "") {
+    		fill(100);
+    		text("Time step",25,height-120,100,40);
+    	} else {
+    		fill(0);
+    		text(timeStep,25,height-120,100,40);
+    	}
     	
     	stroke(0);
     	fill(73, 164, 230);
     	rect(20,80,220,40);
+    	rect(140,height-120,100,40);
     	fill(0);
     	textAlign(CENTER, CENTER);
     	text("Generate",20,80,220,35);
+    	text("Set",140, height-120,100,40);
     	
     	if(invert) {
     		fill(0);
@@ -143,17 +155,32 @@ public class Model extends PApplet{
     		invert = !invert;
     	} else if(mouseX>20 && mouseX<240 && mouseY>80 && mouseY<120) {
     		createNewSim();
+    	} else if(mouseX>140 && mouseX<240 && mouseY>height-120 && mouseY<height-80) {
+    		int t;
+    		if(timeStep == "") {
+    			t = 1;
+    		} else {
+    			t = Integer.parseInt(timeStep);
+    		}
+    		sim.setTimeStep(t);
     	}
     	
     	if(mouseX>20 && mouseX<120 && mouseY>20 && mouseY<60) {
     		numParticlesEdit = true;
     		numChordsEdit = false;
+    		timeStepEdit = false;
     	} else if(mouseX>140 && mouseX<240 && mouseY>20 && mouseY<60) {
-    		numChordsEdit = true;
     		numParticlesEdit = false;
+    		numChordsEdit = true;
+    		timeStepEdit = false;
+    	} else if(mouseX>20 && mouseX<120 && mouseY>height-120 && mouseY<height-80) {
+    		numParticlesEdit = false;
+    		numChordsEdit = false;
+    		timeStepEdit = true;
     	} else {
     		numParticlesEdit = false;
     		numChordsEdit = false;
+    		timeStepEdit = false;
     	}
     }
     
@@ -177,6 +204,15 @@ public class Model extends PApplet{
 	    		} else {
 	    			numChords += key;
 	    		}
+	    	} else if(timeStepEdit && timeStep.length() < 4) {
+	    		if(timeStep.length() == 0) {
+	    			// Prevents leading zeros
+	    			if(key != '0') {
+	    				timeStep += key;
+	    			}
+	    		} else {
+	    			timeStep += key;
+	    		}
 	    	}
     	} else if(keyCode == BACKSPACE) {
     		if(numParticlesEdit && numParticles.length() > 0) {
@@ -190,6 +226,12 @@ public class Model extends PApplet{
     				numChords = "";
     			} else {
     				numChords = numChords.substring(0,numChords.length()-1);
+    			}
+    		} else if(timeStepEdit && timeStep.length() > 0) {
+    			if(timeStep.length() == 1) {
+    				timeStep = "";
+    			} else {
+    				timeStep = timeStep.substring(0,timeStep.length()-1);
     			}
     		}
     	} else if(key == ' ') {
