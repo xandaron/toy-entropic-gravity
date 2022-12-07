@@ -21,6 +21,9 @@ public class Simulation {
 	private void setup() {
 		addParticles();
 		addChords();
+		for(int i = 0; i < 10000; i++) {
+			chordUpdate();
+		}
 	}
 	
 	private void addParticles() {
@@ -84,6 +87,10 @@ public class Simulation {
 	}
 	
 	private void chordUpdate() {
+		if(chords.length == 0) {
+			return;
+		}
+		
 		for(int i = 0; i < timeStep; i++) {
 			int k = rand.nextInt(chords.length-1);
 			if(!chords[k].isExcluded()) {
