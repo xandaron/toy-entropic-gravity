@@ -18,6 +18,7 @@ public class Chord {
 		return (Y2 - Y1) / (X2 - X1);
 	}
 	
+	// Y = m(X - i) + j where x = 0
 	public float getIntercept() {
 		return Y1 - getGradient() * X1;
 	}

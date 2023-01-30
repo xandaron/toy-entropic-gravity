@@ -2,25 +2,47 @@ package toy.entropic.gravity;
 
 public class Particle {
 	
-	private float x, y;
+	private double theta, dst;
 	private float r;
-	public Particle(float x, float y, float r) {
-		this.x = x;
-		this.y = y;
+	public Particle(double theta, double dst, float r) {
+		this.theta = theta;
+		this.dst = dst;
 		this.r = r;
 	}
 	
-	public void move(float dx, float dy) {
-		x += dx;
-		y += dy;
+//	public void move(float dx, float dy) {
+//		x += dx;
+//		y += dy;
+//	}
+	
+	public double distance(Particle p) {
+		double t = theta - p.getTheta();
+		double distanceSq = dst*dst + p.getDistance()*p.getDistance() - 2 * dst * p.getDistance() * Math.cos(t);
+		return Math.sqrt(distanceSq);
+	}
+	
+	public double getTheta() {
+		return theta;
+	}
+	
+	public void setTheta(double t) {
+		theta = t;
+	}
+	
+	public double getDistance() {
+		return dst;
+	}
+	
+	public void setDistance(double d) {
+		dst = d;
 	}
 	
 	public float getX() {
-		return x;
+		return (float) (dst * Math.cos(theta));
 	}
 	
 	public float getY() {
-		return y;
+		return (float) (dst * Math.sin(theta));
 	}
 	
 	public float getR() {
@@ -28,6 +50,6 @@ public class Particle {
 	}
 	
 	public String eq() {
-		return "(x - " + x + ")^2 + (y - " + y + ")^2 = " + r + "^2";
+		return "(x - " + getX() + ")^2 + (y - " + getY() + ")^2 = " + r + "^2";
 	}
 }

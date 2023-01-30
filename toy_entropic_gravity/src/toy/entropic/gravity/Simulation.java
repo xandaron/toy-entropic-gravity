@@ -4,12 +4,11 @@ import java.util.Random;
 public class Simulation {
 	
 	private float radius;
-	private Particle[] particles;
 	private int numParticles = 0;
-	private Chord[] chords;
 	private int numChords = 0;
+	private Particle[] particles;
+	private Chord[] chords;
 	private Random rand = new Random();
-	private int timeStep = 1;
 	
 	public Simulation(float r, int n, int p) {
 		radius = r;
@@ -21,19 +20,17 @@ public class Simulation {
 	private void setup() {
 		addParticles();
 		addChords();
-		for(int i = 0; i < 10000; i++) {
+		for(int i = 0; i < chords.length; i++) {
 			chordUpdate();
 		}
 	}
 	
 	private void addParticles() {
 		for(int i = 0; i < particles.length; i++) {
-			float r = 20 + rand.nextFloat() * 20;
-			float angle = (float) (rand.nextFloat() * Math.PI * 2);
-			float distance = rand.nextFloat() * (radius - r);
-			float x = (float) (distance * Math.cos(angle));
-			float y = (float) (distance * Math.sin(angle));
-			particles[numParticles] = new Particle(x, y, r);
+			float r = 20;
+			double angle = rand.nextDouble() * Math.PI * 2;
+			double distance = rand.nextDouble() * (radius - r);
+			particles[numParticles] = new Particle(angle, distance, r);
 			numParticles++;
 		}
 	}
@@ -77,28 +74,21 @@ public class Simulation {
 		}
 	}
 	
-	public void update() {
-		particleUpdate();
-		chordUpdate();
+	public String[] update() {
+		int entropy = chordUpdate();
+		String e = Integer.toString(entropy);
+		String d = Double.toString(particles[0].distance(particles[1]));
+		String[] r = {d, e};
+		return r;
 	}
 	
-	private void particleUpdate() {
-		
-	}
-	
-	private void chordUpdate() {
-		if(chords.length == 0) {
-			return;
+	private int chordUpdate() {
+		int entropy = 0;
+		for(Chord c : chords) {
+			updateExclusion(c);
+			if(c.isExcluded()) { entropy++; }
 		}
-		
-		for(int i = 0; i < timeStep; i++) {
-			int k = rand.nextInt(chords.length-1);
-			if(!chords[k].isExcluded()) {
-				chords[k].setExcluded(true);
-			} else {
-				updateExclusion(chords[k]);
-			}
-		}
+		return entropy;
 	}
 	
 	private void updateExclusion(Chord c) {
@@ -134,10 +124,6 @@ public class Simulation {
 				break;
 			}
 		}
-	}
-	
-	public void setTimeStep(int t) {
-		timeStep = t;
 	}
 	
 	public Particle[] getParticles() {
