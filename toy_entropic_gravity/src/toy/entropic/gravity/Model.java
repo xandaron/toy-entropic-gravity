@@ -4,13 +4,9 @@ import processing.core.*;
 public class Model extends PApplet{
 	
 	Simulation sim;
-	boolean run = false;
-	boolean invert = false;
 	float offsetX, offsetY;
-	String numParticles = "";
-	String numChords = "";
-	boolean numParticlesEdit = false;
-	boolean numChordsEdit = false;
+	Button[] buttons = new Button[4];
+	InputBox[] inputBoxs = new InputBox[2];
 	FileHandler fileHandler = new FileHandler();
 	public static void main(String[] args) {
 		PApplet.main(new String[] {toy.entropic.gravity.Model.class.getName()});
@@ -27,59 +23,67 @@ public class Model extends PApplet{
         strokeWeight(1);
         
         sim = new Simulation(height / 2 - 5, 0, 0);
-        
         offsetX = width - 5 - sim.getRadius();
         offsetY = height / 2;
+
+    	textSize(20);
+    	
+    	// Buttons
+        // Start/Stop
+        buttons[0] = new Button(20, height - 60, 40, 40, color(0, 200, 0), color(200, 0 ,0));
+        // Colour invert
+        buttons[1] = new Button(80, height - 60, 40, 40, color(255), color(0));
+        // Generate
+        buttons[2] = new Button(20, 80, 220, 40, color(73, 164, 230), "Generate");
+        // Save
+        buttons[3] = new Button(20, 130, 220, 40, color(255), "Save");
+        
+        // Input fields
+        // Particles
+        inputBoxs[0] = new InputBox(20,20,100,40,"#Particles",3);
+        // Chords
+        inputBoxs[1] = new InputBox(140,20,100,40,"#Chords",5);
     }
     
     public void draw(){
     	background(130);
     	stroke(0);
-    	if(!run) {
-    		fill(0, 200, 0);
-    	} else {
-    		fill(200, 0 ,0);
-    	}
-    	rect(20, height - 60, 40, 40);
     	
-    	if(invert) {
-    		fill(0);
-    	} else {
-    		fill(255);
+    	if(buttons[2].state) {
+    		createNewSim();
+    		buttons[2].toggleState();
     	}
-    	rect(80, height - 60, 40, 40);
-    	
-    	// Input boxes
-    	fill(250);
-    	if(numParticlesEdit) { stroke(222, 197, 7); } else { stroke(0); }
-    	rect(20,20,100,40);
-    	if(numChordsEdit) { stroke(222, 197, 7); } else { stroke(0); }
-    	rect(140,20,100,40);
-    	textAlign(LEFT,CENTER);
-    	textSize(20);
-    	if(numParticles == "") {
-    		fill(100);
-    		text("#Particles",25,20,100,40);
-    	} else {
-    		fill(0);
-    		text(numParticles,25,20,100,40);
-    	}
-    	if(numChords == "") {
-    		fill(100);
-    		text("#Chords",145,20,100,40);
-    	} else {
-    		fill(0);
-    		text(numChords,145,20,100,40);
+    	if(buttons[3].state) {
+    		fileHandler.saveData();
+    		buttons[3].toggleState();
     	}
     	
-    	stroke(0);
-    	fill(73, 164, 230);
-    	rect(20,80,220,40);
-    	fill(0);
-    	textAlign(CENTER, CENTER);
-    	text("Generate",20,80,220,35);
+    	for(Button b : buttons) {
+    		fill(b.getColour());
+    		rect(b.x, b.y, b.width, b.height);
+    		if(b.text != "") {
+    			fill(0);
+    	    	textAlign(CENTER, CENTER);
+    	    	text(b.text,b.x,b.y,b.width,b.height);
+    		}
+    	}
     	
-    	if(invert) {
+    	for(InputBox b : inputBoxs) {
+        	if(b.state) { stroke(222, 197, 7); } else { stroke(0); }
+        	fill(250);
+        	rect(b.x,b.y,b.width,b.height);
+        	
+        	textAlign(LEFT,CENTER);
+        	if(b.value == "") {
+        		fill(100);
+        		text(b.text,b.x+5,b.y,b.width,b.height);
+        	} else {
+        		fill(0);
+        		text(b.value,b.x+5,b.y,b.width,b.height);
+        	}
+    	}
+    	
+    	if(buttons[1].state) {
     		fill(0);
     	} else {
     		fill(255);
@@ -92,7 +96,7 @@ public class Model extends PApplet{
     		if(c.isExcluded()) {
     			stroke(150);
     		} else {
-    			if(invert) {
+    			if(buttons[1].state) {
     				stroke(255);
     			} else {
     				stroke(0);
@@ -113,7 +117,7 @@ public class Model extends PApplet{
     	strokeWeight(1);
     	circle(offsetX, offsetY, 2 * sim.getRadius());
     	
-    	if(run) {
+    	if(buttons[0].state) {
 	    	String[] data = sim.update();
 	    	fileHandler.addDataLine(data);
     	}
@@ -124,16 +128,16 @@ public class Model extends PApplet{
     	fileHandler.newFile();
     	
     	int c, p;
-    	if(numChords.length() == 0) {
+    	if(inputBoxs[1].value.length() == 0) {
     		c = 0;
     	} else {
-    		c = Integer.parseInt(numChords);
+    		c = inputBoxs[1].getValue();
     	}
     	
-    	if(numParticles.length() == 0) {
+    	if(inputBoxs[0].value.length() == 0) {
     		p = 0;
     	} else {
-    		p = Integer.parseInt(numParticles);
+    		p = inputBoxs[0].getValue();
     	}
     	
     	System.out.println("\nNew simulation started;\n #Particles: " + p + "\n #Chords:    " + c);
@@ -141,65 +145,38 @@ public class Model extends PApplet{
     }
     
     public void mousePressed() {
-    	if(mouseX>20 && mouseX<60 && mouseY>height-60 && mouseY<height-20) {
-    		run = !run;
-    	} else if(mouseX>80 && mouseX<120 && mouseY>height-60 && mouseY<height-20) {
-    		invert = !invert;
-    	} else if(mouseX>20 && mouseX<240 && mouseY>80 && mouseY<120) {
-    		createNewSim();
+    	for(Button b : buttons) {
+    		if(mouseX>b.x && mouseX<b.x+b.width && mouseY>b.y && mouseY<b.y+b.height) {
+        		b.toggleState();
+        	}
     	}
     	
-    	if(mouseX>20 && mouseX<120 && mouseY>20 && mouseY<60) {
-    		numParticlesEdit = true;
-    		numChordsEdit = false;
-    	} else if(mouseX>140 && mouseX<240 && mouseY>20 && mouseY<60) {
-    		numParticlesEdit = false;
-    		numChordsEdit = true;
-    	} else {
-    		numParticlesEdit = false;
-    		numChordsEdit = false;
+    	for(InputBox b : inputBoxs) {
+    		if(mouseX>b.x && mouseX<b.x+b.width && mouseY>b.y && mouseY<b.y+b.height) {
+    			b.setState(true);
+    		} else {
+    			b.setState(false);
+    		}
     	}
     }
     
     public void keyPressed() {
-    	if(key=='0'||key=='1'||key=='2'||key=='3'||key=='4'||key=='5'||key=='6'||key=='7'||key=='8'||key=='9') {
-	    	if(numParticlesEdit && numParticles.length() < 3) {
-	    		if(numParticles.length() == 0) {
-	    			// Prevents leading zeros
-	    			if(key != '0') {
-	    				numParticles += key;
-	    			}
-	    		} else {
-	    			numParticles += key;
-	    		}
-	    	} else if(numChordsEdit && numChords.length() < 5) {
-	    		if(numChords.length() == 0) {
-	    			// Prevents leading zeros
-	    			if(key != '0') {
-	    				numChords += key;
-	    			}
-	    		} else {
-	    			numChords += key;
-	    		}
-	    	}
-    	} else if(keyCode == BACKSPACE) {
-    		if(numParticlesEdit && numParticles.length() > 0) {
-    			if(numParticles.length() == 1) {
-    				numParticles = "";
-    			} else {
-    				numParticles = numParticles.substring(0,numParticles.length()-1);
+    	if(Character.isDigit(key)) {
+    		for(InputBox b : inputBoxs) {
+    			if(b.state && b.value.length() < b.maxLength) {
+    				b.appendValue(key);
     			}
-    		} else if(numChordsEdit && numChords.length() > 0) {
-    			if(numChords.length() == 1) {
-    				numChords = "";
-    			} else {
-    				numChords = numChords.substring(0,numChords.length()-1);
+    		}
+    	} else if(keyCode == BACKSPACE) {
+    		for(InputBox b : inputBoxs) {
+    			if(b.state) {
+    				b.popValue();
     			}
     		}
     	} else if(key == ' ') {
-    		run = !run;
+    		buttons[1].state = !buttons[1].state;
     	} else if(key == 'i' || key == 'I') {
-    		invert = !invert;
+    		buttons[1].state = !buttons[1].state;
     	} else if(key == 'n' || key == 'N') {
     		createNewSim();
     	}

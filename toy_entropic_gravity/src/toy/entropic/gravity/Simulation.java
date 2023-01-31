@@ -75,11 +75,21 @@ public class Simulation {
 	}
 	
 	public String[] update() {
+		particleUpdate();
 		int entropy = chordUpdate();
 		String e = Integer.toString(entropy);
 		String d = Double.toString(particles[0].distance(particles[1]));
 		String[] r = {d, e};
 		return r;
+	}
+	
+	private void particleUpdate() {
+		for(Particle p : particles) {
+			double angle = rand.nextDouble() * Math.PI * 2;
+			double distance = rand.nextDouble() * (radius - p.getR());
+			p.setTheta(angle);
+			p.setDistance(distance);
+		}
 	}
 	
 	private int chordUpdate() {

@@ -10,11 +10,6 @@ public class Particle {
 		this.r = r;
 	}
 	
-//	public void move(float dx, float dy) {
-//		x += dx;
-//		y += dy;
-//	}
-	
 	public double distance(Particle p) {
 		double t = theta - p.getTheta();
 		double distanceSq = dst*dst + p.getDistance()*p.getDistance() - 2 * dst * p.getDistance() * Math.cos(t);
