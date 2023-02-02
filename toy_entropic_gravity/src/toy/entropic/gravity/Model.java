@@ -5,6 +5,7 @@ public class Model extends PApplet{
 	
 	Simulation sim;
 	float offsetX, offsetY;
+	int mode = 1;
 	Button[] buttons = new Button[4];
 	InputBox[] inputBoxs = new InputBox[2];
 	FileHandler fileHandler = new FileHandler();
@@ -20,9 +21,12 @@ public class Model extends PApplet{
     public void setup(){
         surface.setTitle("Toy Entropic Gravity");
         surface.setLocation(10, 10);
+        // Set high so it will run as fast as possible
+        frameRate(1000000);
         strokeWeight(1);
         
-        sim = new Simulation(height / 2 - 5, 0, 0);
+        fileHandler.newFile();
+        sim = new Simulation(height / 2 - 5, 0, 0, mode);
         offsetX = width - 5 - sim.getRadius();
         offsetY = height / 2;
 
@@ -55,6 +59,7 @@ public class Model extends PApplet{
     	}
     	if(buttons[3].state) {
     		fileHandler.saveData();
+    		fileHandler.newFile();
     		buttons[3].toggleState();
     	}
     	
@@ -118,15 +123,16 @@ public class Model extends PApplet{
     	circle(offsetX, offsetY, 2 * sim.getRadius());
     	
     	if(buttons[0].state) {
-	    	String[] data = sim.update();
-	    	fileHandler.addDataLine(data);
+    		if(!sim.complete) {
+		    	String[] data = sim.update();
+		    	fileHandler.addDataLine(data);
+    		} else {
+    			createNewSim();
+    		}
     	}
     }
     
     public void createNewSim() {
-    	fileHandler.saveData();
-    	fileHandler.newFile();
-    	
     	int c, p;
     	if(inputBoxs[1].value.length() == 0) {
     		c = 0;
@@ -141,7 +147,7 @@ public class Model extends PApplet{
     	}
     	
     	System.out.println("\nNew simulation started;\n #Particles: " + p + "\n #Chords:    " + c);
-    	sim = new Simulation(height / 2 - 5, c, p);
+    	sim = new Simulation(height / 2 - 5, c, p, mode);
     }
     
     public void mousePressed() {

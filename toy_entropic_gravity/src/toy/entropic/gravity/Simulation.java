@@ -4,13 +4,16 @@ import java.util.Random;
 public class Simulation {
 	
 	private float radius;
+	int mode;
 	private int numParticles = 0;
 	private int numChords = 0;
 	private Particle[] particles;
 	private Chord[] chords;
 	private Random rand = new Random();
+	public boolean complete = false;
 	
-	public Simulation(float r, int n, int p) {
+	public Simulation(float r, int n, int p, int m) {
+		mode = m;
 		radius = r;
 		particles = new Particle[p];
 		chords = new Chord[n];
@@ -28,8 +31,15 @@ public class Simulation {
 	private void addParticles() {
 		for(int i = 0; i < particles.length; i++) {
 			float r = 20;
-			double angle = rand.nextDouble() * Math.PI * 2;
-			double distance = rand.nextDouble() * (radius - r);
+			double angle = 0;
+			double distance = 0;
+			if(mode == 0) {
+				angle = rand.nextDouble() * Math.PI * 2;
+				distance = rand.nextDouble() * (radius - r);
+			} else if(mode == 1) {
+				angle = (Math.PI / 22.5) + (Math.PI * numParticles);
+				distance = radius - r;
+			}
 			particles[numParticles] = new Particle(angle, distance, r);
 			numParticles++;
 		}
@@ -75,20 +85,42 @@ public class Simulation {
 	}
 	
 	public String[] update() {
-		particleUpdate();
-		int entropy = chordUpdate();
-		String e = Integer.toString(entropy);
-		String d = Double.toString(particles[0].distance(particles[1]));
-		String[] r = {d, e};
-		return r;
+		if(!complete) {
+			particleUpdate();
+			int entropy = chordUpdate();
+			String e = Integer.toString(entropy);
+			String d = Double.toString(particles[0].distance(particles[1]));
+			String[] r = {d, e};
+			return r;
+		} else {
+			return new String[2];
+		}
 	}
 	
 	private void particleUpdate() {
-		for(Particle p : particles) {
-			double angle = rand.nextDouble() * Math.PI * 2;
-			double distance = rand.nextDouble() * (radius - p.getR());
-			p.setTheta(angle);
-			p.setDistance(distance);
+		if(mode == 0) {
+			for(Particle p : particles) {
+				double angle = rand.nextDouble() * Math.PI * 2;
+				double distance = rand.nextDouble() * (radius - p.getR());
+				p.setTheta(angle);
+				p.setDistance(distance);
+			}
+		} else if (mode == 1) {
+			if(particles[0].getTheta() >= Math.PI * 2) {
+				particles[0].setTheta(0);
+				particles[1].setTheta(Math.PI);
+				for(Particle p : particles) {
+					p.setDistance(p.getDistance() - 0.1 * radius);
+				}
+				if(particles[0].getDistance() < 0) {
+					complete = true;
+					return;
+				}
+			}
+			for(Particle p : particles) {
+				double angle = p.getTheta() + Math.PI / 22.5;
+				p.setTheta(angle);
+			}
 		}
 	}
 	
