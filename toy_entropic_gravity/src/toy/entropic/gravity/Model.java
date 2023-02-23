@@ -5,10 +5,13 @@ public class Model extends PApplet{
 	
 	Simulation sim;
 	float offsetX, offsetY;
-	int mode = 1;
+	int distances = 100;
+	int iterations = 10;
+	int runs = 1;
 	Button[] buttons = new Button[4];
 	InputBox[] inputBoxs = new InputBox[2];
 	FileHandler fileHandler = new FileHandler();
+	boolean graphics = false;
 	public static void main(String[] args) {
 		PApplet.main(new String[] {toy.entropic.gravity.Model.class.getName()});
 	}
@@ -26,7 +29,7 @@ public class Model extends PApplet{
         strokeWeight(1);
         
         fileHandler.newFile();
-        sim = new Simulation(height / 2 - 5, 0, 0, mode);
+        sim = new Simulation(this, height / 2 - 5, 0, 0, 1);
         offsetX = width - 5 - sim.getRadius();
         offsetY = height / 2;
 
@@ -46,7 +49,7 @@ public class Model extends PApplet{
         // Particles
         inputBoxs[0] = new InputBox(20,20,100,40,"#Particles",3);
         // Chords
-        inputBoxs[1] = new InputBox(140,20,100,40,"#Chords",5);
+        inputBoxs[1] = new InputBox(140,20,100,40,"#Chords",1000);
     }
     
     public void draw(){
@@ -97,25 +100,27 @@ public class Model extends PApplet{
     	strokeWeight(1);
     	circle(offsetX, offsetY, 2 * sim.getRadius());
     	
-    	for(Chord c : sim.getChords()) {
-    		if(c.isExcluded()) {
-    			stroke(150);
-    		} else {
-    			if(buttons[1].state) {
-    				stroke(255);
-    			} else {
-    				stroke(0);
-    			}
-    		}
-    		line(offsetX + c.getX1(), offsetY + c.getY1(), offsetX + c.getX2(), offsetY + c.getY2());
+    	if(graphics) {
+	    	for(Chord c : sim.getChords()) {
+	    		if(c.isExcluded()) {
+	    			stroke(150);
+	    		} else {
+	    			if(buttons[1].state) {
+	    				stroke(255);
+	    			} else {
+	    				stroke(0);
+	    			}
+	    		}
+	    		line((float) (offsetX + c.getX1()), (float) (offsetY + c.getY1()), (float) (offsetX + c.getX2()), (float) (offsetY + c.getY2()));
+	    	}
     	}
-    	
     	for(Particle p : sim.getParticles()) {
     		noFill();
     		strokeWeight(1);
     		stroke(255,0,0);
-    		circle(offsetX + p.getX(), offsetY + p.getY(), p.getR() * 2);
+    		circle(offsetX + p.getX(), offsetY + p.getY(), (float) (p.getR() * 2));
     	}
+    	
     	
     	noFill();
     	stroke(0);
@@ -125,8 +130,12 @@ public class Model extends PApplet{
     	if(buttons[0].state) {
     		if(!sim.complete) {
 		    	String[] data = sim.update();
-		    	fileHandler.addDataLine(data);
-    		} else {
+		    	if(data != null) {
+		    		fileHandler.addDataLine(data);
+		    	}
+    		} else if (iterations!=runs) {
+    			System.out.println(runs+"/"+iterations);
+    			runs++;
     			createNewSim();
     		}
     	}
@@ -147,7 +156,13 @@ public class Model extends PApplet{
     	}
     	
     	System.out.println("\nNew simulation started;\n #Particles: " + p + "\n #Chords:    " + c);
-    	sim = new Simulation(height / 2 - 5, c, p, mode);
+    	sim = new Simulation(this, height / 2 - 5, c, p, distances);
+    	double r = sim.getParticles()[0].distance(sim.getParticles()[1]);
+    	double e = sim.calculateLegalRatio(); 
+    	double d = sim.calculateDerivative();
+    	
+    	String[] a = {Double.toString(r), Double.toString(e), Double.toString(d)};
+    	fileHandler.addDataLine(a);
     }
     
     public void mousePressed() {

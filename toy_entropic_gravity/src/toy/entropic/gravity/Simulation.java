@@ -4,139 +4,176 @@ import java.util.Random;
 public class Simulation {
 	
 	private float radius;
-	int mode;
-	private int numParticles = 0;
-	private int numChords = 0;
+	private int numParticles;
+	private int numChords;
+	private double dstStep;
+	private double pSize;
 	private Particle[] particles;
 	private Chord[] chords;
 	private Random rand = new Random();
+	private int[] legalTracker = {0, 0};
 	public boolean complete = false;
+	private double delta = 6.133777822;
+	public Model owner;
 	
-	public Simulation(float r, int n, int p, int m) {
-		mode = m;
+	public Simulation(Model o, float r, int n, int p, int i) {
+		owner = o;
 		radius = r;
 		particles = new Particle[p];
-		chords = new Chord[n];
+		numChords = n;
+		pSize = radius * 0.13;
+		dstStep = (radius - pSize * 2 - delta) / --i;
 		setup();
 	}
 	
 	private void setup() {
 		addParticles();
 		addChords();
-		for(int i = 0; i < chords.length; i++) {
-			chordUpdate();
-		}
 	}
 	
 	private void addParticles() {
 		for(int i = 0; i < particles.length; i++) {
-			float r = 20;
-			double angle = 0;
-			double distance = 0;
-			if(mode == 0) {
-				angle = rand.nextDouble() * Math.PI * 2;
-				distance = rand.nextDouble() * (radius - r);
-			} else if(mode == 1) {
-				angle = (Math.PI / 22.5) + (Math.PI * numParticles);
-				distance = radius - r;
-			}
-			particles[numParticles] = new Particle(angle, distance, r);
+			double r = pSize;
+			double angle = Math.PI * numParticles;
+			particles[numParticles] = new Particle(angle, r, r);
 			numParticles++;
 		}
 	}
 	
 	private void addChords() {
-		for(int i = 0; i < chords.length; i++) {
-			float angle = (float) (rand.nextFloat() * Math.PI * 2);
-			float distance = rand.nextFloat() * radius;
+		if(owner.graphics) {
+			chords = new Chord[chords.length];
+		}
+		
+		for(int i = 0; i < numChords; i++) {
+			double angle = rand.nextDouble() * Math.PI * 2;
+			double distance = rand.nextDouble() * radius;
 			 
-			float x = (float) (distance * Math.cos(angle));
-			float y = (float) (distance * Math.sin(angle));
+			double x = distance * Math.cos(angle);
+			double y = distance * Math.sin(angle);
 			angle += (float) (Math.PI / 2);
-			float dx = (float) Math.cos(angle);
-			float dy = (float) Math.sin(angle);
+			double grad = Math.sin(angle)/Math.cos(angle);
 			
-			float x1, x2, y1, y2;
-			if(dy == 0.0f) {
-				x1 = x;
-				y1 = (float) Math.sqrt(radius*radius - x*x);
-				x2 = x;
-				y2 = -y1;
-			} else if (dx == 0.0f) {
-				y1 = y;
-				x1 = (float) Math.sqrt(radius*radius - y*y);
-				y2 = y;
-				x2 = -x1;
+			if(owner.graphics) {
+				double x1, x2, y1, y2;
+				if(grad == Double.POSITIVE_INFINITY || grad == Double.NEGATIVE_INFINITY) {
+					x1 = x;
+					y1 = Math.sqrt(radius*radius - x*x);
+					x2 = x;
+					y2 = -y1;
+				} else if (grad == 0) {
+					y1 = y;
+					x1 = Math.sqrt(radius*radius - y*y);
+					y2 = y;
+					x2 = -x1;
+				} else {
+					double inte = y - grad*x;
+					double a = grad*grad + 1;
+					double b = 2*grad*inte;
+					double c = inte*inte - radius*radius;
+					x1 = (-b - Math.sqrt(b*b - 4*a*c)) / (2*a);
+					x2 = (-b + Math.sqrt(b*b - 4*a*c)) / (2*a);
+					y1 = grad*x1 + inte;
+					y2 = grad*x2 + inte;
+				}
+				chords[i] = new Chord(x1, y1, x2, y2);
+				updateExclusion(chords[i]);
 			} else {
-				float grad = dy / dx;
-				float inte = (float) (y - grad*x);
-				float a = grad*grad + 1;
-				float b = 2*grad*inte;
-				float c = inte*inte - radius*radius;
-				x1 = (float) ((-b - Math.sqrt(b*b - 4*a*c)) / (2*a));
-				x2 = (float) ((-b + Math.sqrt(b*b - 4*a*c)) / (2*a));
-				y1 = grad*x1 + inte;
-				y2 = grad*x2 + inte;
+				boolean[] exclusion = {false, false};
+				for(Particle p : particles) {
+					for(int k = 0; k < 2; k++) {
+						p.setDistance(p.getDistance() + delta * k);
+						if(grad == 0) {
+							if(p.getY()-p.getR()<y && p.getY()+p.getR()>y) {
+								exclusion[k] = true;
+							}
+						} else if(grad == Double.POSITIVE_INFINITY || grad == Double.NEGATIVE_INFINITY) {
+							if(p.getX()-p.getR()<x && p.getX()+p.getR()>x) {
+								exclusion[k] = true;
+							}
+						} else {
+							double inte = y - grad * x;
+							double a = 1 + grad*grad;
+							double b = 2*(grad * (inte - p.getY()) - p.getX());
+							double d = p.getX()*p.getX() - p.getR()*p.getR() +
+									(inte - p.getY())*(inte - p.getY());
+							if(b*b - 4*a*d >= 0.0d) {
+								exclusion[k] = true;
+							}
+						}
+						p.setDistance(p.getDistance() - delta * k);
+					}
+				}
+				if(!exclusion[0]) { legalTracker[0] += 1; }
+				if(!exclusion[1]) { legalTracker[1] += 1; }
 			}
-			chords[numChords] = new Chord(x1, y1, x2, y2);
-			updateExclusion(chords[numChords]);
-			numChords++;
 		}
 	}
 	
 	public String[] update() {
+		legalTracker[0] = 0;
+		legalTracker[1] = 0;
+		complete = particleUpdate();
 		if(!complete) {
-			particleUpdate();
-			int entropy = chordUpdate();
-			String e = Integer.toString(entropy);
-			String d = Double.toString(particles[0].distance(particles[1]));
-			String[] r = {d, e};
-			return r;
+			addChords();
+			double entropy = calculateLegalRatio();
+			double derivative = calculateDerivative();
+			String r = Double.toString(particles[0].distance(particles[1]));
+			String e = Double.toString(entropy);
+			String d = Double.toString(derivative);
+			String[] a = {r, e, d};
+			return a;
 		} else {
-			return new String[2];
+			System.out.println("Sim complete.");
+			return null;
 		}
 	}
 	
-	private void particleUpdate() {
-		if(mode == 0) {
+	private boolean particleUpdate() {
+		for(Particle p : particles) {
+			double distance = p.getDistance() + dstStep;
+			if(distance + p.getR() > radius) {
+				return true;
+			}
+			p.setDistance(distance);
+		}
+		return false;
+	}
+	
+	public double calculateDerivative() {
+		if(owner.graphics) {
+			double e = calculateLegalRatio();
 			for(Particle p : particles) {
-				double angle = rand.nextDouble() * Math.PI * 2;
-				double distance = rand.nextDouble() * (radius - p.getR());
-				p.setTheta(angle);
-				p.setDistance(distance);
+				p.setDistance(p.getDistance() + delta);
 			}
-		} else if (mode == 1) {
-			if(particles[0].getTheta() >= Math.PI * 2) {
-				particles[0].setTheta(0);
-				particles[1].setTheta(Math.PI);
-				for(Particle p : particles) {
-					p.setDistance(p.getDistance() - 0.1 * radius);
-				}
-				if(particles[0].getDistance() < 0) {
-					complete = true;
-					return;
-				}
+			for(Chord c : chords) {
+				updateExclusion(c);
 			}
+			double a = calculateLegalRatio();
 			for(Particle p : particles) {
-				double angle = p.getTheta() + Math.PI / 22.5;
-				p.setTheta(angle);
+				p.setDistance(p.getDistance() - delta);
 			}
+			return (a - e) / delta;
+		} else {
+			double r = (double) (legalTracker[1] - legalTracker[0]) / (delta * numChords);
+			return r;
 		}
 	}
 	
-	private int chordUpdate() {
-		int entropy = 0;
-		for(Chord c : chords) {
-			updateExclusion(c);
-			if(c.isExcluded()) { entropy++; }
+	public double calculateLegalRatio() {
+		if(owner.graphics) {
+			double e = 0;
+			for(Chord c : chords) { if(!c.isExcluded()) { e++; } }
+			return e / chords.length;
+		} else {
+			return (double) (legalTracker[0]) / numChords;
 		}
-		return entropy;
 	}
 	
 	private void updateExclusion(Chord c) {
 		c.setExcluded(false);
 		for(Particle p : particles) {
-			float grad = c.getGradient();
+			double grad = c.getGradient();
 			
 			if(grad == 0) {
 				if(p.getY()-p.getR()<c.getY() && p.getY()+p.getR()>c.getY()) {
@@ -147,7 +184,7 @@ public class Simulation {
 				}
 			}
 			
-			if(grad == Float.POSITIVE_INFINITY || grad == Float.NEGATIVE_INFINITY) {
+			if(grad == Double.POSITIVE_INFINITY || grad == Double.NEGATIVE_INFINITY) {
 				if(p.getX()-p.getR()<c.getX() && p.getX()+p.getR()>c.getX()) {
 					c.setExcluded(true);
 					break;
@@ -156,16 +193,20 @@ public class Simulation {
 				}
 			}
 			
-			float inte = c.getIntercept();
-			float a = 1 + grad*grad;
-			float b = 2*(grad * (inte - p.getY()) - p.getX());
-			float d = p.getX()*p.getX() - p.getR()*p.getR() +
+			double inte = c.getIntercept();
+			double a = 1 + grad*grad;
+			double b = 2*(grad * (inte - p.getY()) - p.getX());
+			double d = p.getX()*p.getX() - p.getR()*p.getR() +
 					(inte - p.getY())*(inte - p.getY());
-			if(b*b - 4*a*d >= 0.0f) {
+			if(b*b - 4*a*d >= 0.0d) {
 				c.setExcluded(true);
 				break;
 			}
 		}
+	}
+	
+	public double getDistanceStep() {
+		return dstStep;
 	}
 	
 	public Particle[] getParticles() {
@@ -178,5 +219,9 @@ public class Simulation {
 
 	public float getRadius() {
 		return radius;
+	}
+	
+	public int[] getLegalTracker() {
+		return legalTracker;
 	}
 }

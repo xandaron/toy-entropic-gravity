@@ -1,4 +1,4 @@
 bin
 *.class
 .metadata/
-output/*.csv
+./toy_entropic_gravity/output/*

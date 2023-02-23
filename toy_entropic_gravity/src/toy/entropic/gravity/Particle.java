@@ -3,8 +3,8 @@ package toy.entropic.gravity;
 public class Particle {
 	
 	private double theta, dst;
-	private float r;
-	public Particle(double theta, double dst, float r) {
+	private double r;
+	public Particle(double theta, double dst, double r) {
 		this.theta = theta;
 		this.dst = dst;
 		this.r = r;
@@ -40,7 +40,7 @@ public class Particle {
 		return (float) (dst * Math.sin(theta));
 	}
 	
-	public float getR() {
+	public double getR() {
 		return r;
 	}
 	
