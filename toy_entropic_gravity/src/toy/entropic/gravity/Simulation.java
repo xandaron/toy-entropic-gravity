@@ -23,7 +23,7 @@ public class Simulation {
 		chords = new Chord[n];
 		numChords = n;
 		pSize = radius * 0.13;
-		dstStep = (radius - pSize * 2 - delta) / --i;
+		dstStep = (radius * 0.74 - delta) / --i;
 		setup();
 	}
 	
@@ -112,7 +112,7 @@ public class Simulation {
 		}
 	}
 	
-	public String[] update() {
+	public void update() {
 		legalTracker[0] = 0;
 		legalTracker[1] = 0;
 		complete = particleUpdate();
@@ -124,10 +124,9 @@ public class Simulation {
 			String e = Double.toString(entropy);
 			String d = Double.toString(derivative);
 			String[] a = {r, e, d};
-			return a;
+			owner.addData(a);
 		} else {
 			System.out.println("Sim complete.");
-			return null;
 		}
 	}
 	
@@ -228,5 +227,9 @@ public class Simulation {
 	
 	public int[] getLegalTracker() {
 		return legalTracker;
+	}
+	
+	public double getPSize() {
+		return pSize;
 	}
 }

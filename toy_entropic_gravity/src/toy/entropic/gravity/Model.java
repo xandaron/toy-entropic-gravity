@@ -6,10 +6,10 @@ public class Model extends PApplet{
 	Simulation sim;
 	float offsetX, offsetY;
 	int distances = 20;
-	int iterations = 100;
+	int iterations = 50;
 	boolean complete = false;
 	int runs = 1;
-	Button[] buttons = new Button[4];
+	Button[] buttons = new Button[5];
 	InputBox[] inputBoxs = new InputBox[2];
 	FileHandler fileHandler = new FileHandler();
 	boolean graphics = true;
@@ -45,6 +45,8 @@ public class Model extends PApplet{
         buttons[2] = new Button(20, 80, 220, 40, color(73, 164, 230), "Generate");
         // Save
         buttons[3] = new Button(20, 130, 220, 40, color(255), "Save");
+        // Line uniformity test
+        buttons[4] = new Button(20, height - 120, 100, 40, color(138, 233, 255), "Test");
         
         // Input fields
         // Particles
@@ -58,6 +60,8 @@ public class Model extends PApplet{
     	stroke(0);
     	
     	if(buttons[2].state) {
+    		fileHandler.newFile();
+    		iterations = 50;
     		createNewSim();
     		buttons[2].toggleState();
     	}
@@ -65,6 +69,12 @@ public class Model extends PApplet{
     		fileHandler.saveData();
     		fileHandler.newFile();
     		buttons[3].toggleState();
+    	}
+    	if(buttons[4].state) {
+    		fileHandler.newFile();
+    		iterations = 50;
+    		test();
+    		buttons[4].toggleState();
     	}
     	
     	for(Button b : buttons) {
@@ -130,10 +140,7 @@ public class Model extends PApplet{
     	
     	if(buttons[0].state) {
     		if(!sim.complete) {
-		    	String[] data = sim.update();
-		    	if(data != null) {
-		    		fileHandler.addDataLine(data);
-		    	}
+    			sim.update();
     		} else if (iterations!=runs) {
     			System.out.println(runs+"/"+iterations);
     			runs++;
@@ -168,7 +175,16 @@ public class Model extends PApplet{
     	double d = sim.calculateDerivative();
     	
     	String[] a = {Double.toString(r), Double.toString(e), Double.toString(d)};
-    	fileHandler.addDataLine(a);
+    	addData(a);
+    }
+    
+    public void test() {
+    	new BertrandMethodTest(this).update();
+    	fileHandler.saveData();
+    }
+    
+    public void addData(String[] data) {
+    	fileHandler.addDataLine(data);
     }
     
     public void mousePressed() {
