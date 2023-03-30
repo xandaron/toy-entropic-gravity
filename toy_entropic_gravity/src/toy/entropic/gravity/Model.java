@@ -5,13 +5,14 @@ public class Model extends PApplet{
 	
 	Simulation sim;
 	float offsetX, offsetY;
-	int distances = 100;
-	int iterations = 10;
+	int distances = 20;
+	int iterations = 100;
+	boolean complete = false;
 	int runs = 1;
 	Button[] buttons = new Button[4];
 	InputBox[] inputBoxs = new InputBox[2];
 	FileHandler fileHandler = new FileHandler();
-	boolean graphics = false;
+	boolean graphics = true;
 	public static void main(String[] args) {
 		PApplet.main(new String[] {toy.entropic.gravity.Model.class.getName()});
 	}
@@ -137,6 +138,10 @@ public class Model extends PApplet{
     			System.out.println(runs+"/"+iterations);
     			runs++;
     			createNewSim();
+    			if(iterations == runs) { complete = true; }
+    		} else if (complete) {
+    			fileHandler.saveData();
+    			complete = false;
     		}
     	}
     }
@@ -147,6 +152,7 @@ public class Model extends PApplet{
     		c = 0;
     	} else {
     		c = inputBoxs[1].getValue();
+    		if(c > 1000) { graphics = false; } else { graphics = true; }
     	}
     	
     	if(inputBoxs[0].value.length() == 0) {

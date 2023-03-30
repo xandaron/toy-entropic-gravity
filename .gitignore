@@ -1,4 +1,4 @@
 bin
 *.class
 .metadata/
-./toy_entropic_gravity/output/*
+./toy_entropic_gravity/output

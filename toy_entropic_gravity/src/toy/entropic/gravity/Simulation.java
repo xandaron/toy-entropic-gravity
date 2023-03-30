@@ -20,6 +20,7 @@ public class Simulation {
 		owner = o;
 		radius = r;
 		particles = new Particle[p];
+		chords = new Chord[n];
 		numChords = n;
 		pSize = radius * 0.13;
 		dstStep = (radius - pSize * 2 - delta) / --i;
@@ -41,6 +42,7 @@ public class Simulation {
 	}
 	
 	private void addChords() {
+		
 		if(owner.graphics) {
 			chords = new Chord[chords.length];
 		}
@@ -152,6 +154,9 @@ public class Simulation {
 			double a = calculateLegalRatio();
 			for(Particle p : particles) {
 				p.setDistance(p.getDistance() - delta);
+			}
+			for(Chord c : chords) {
+				updateExclusion(c);
 			}
 			return (a - e) / delta;
 		} else {
