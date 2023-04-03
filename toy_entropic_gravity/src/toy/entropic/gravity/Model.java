@@ -7,8 +7,12 @@ public class Model extends PApplet{
 	float offsetX, offsetY;
 	int distances = 20;
 	int iterations = 50;
+	float modelRadius = 1000f;
+	float scale;
 	boolean complete = false;
 	int runs = 1;
+	String[] data = new String[distances];
+	int pointer = 0;
 	Button[] buttons = new Button[5];
 	InputBox[] inputBoxs = new InputBox[2];
 	FileHandler fileHandler = new FileHandler();
@@ -30,10 +34,11 @@ public class Model extends PApplet{
         strokeWeight(1);
         
         fileHandler.newFile();
-        sim = new Simulation(this, height / 2 - 5, 0, 0, 1);
-        offsetX = width - 5 - sim.getRadius();
+        sim = new Simulation(this, modelRadius, 0, 1);
+    	scale = (height/2-5)/modelRadius;
+        offsetX = width - 5 - (sim.getRadius() * scale);
         offsetY = height / 2;
-
+        
     	textSize(20);
     	
     	// Buttons
@@ -50,18 +55,18 @@ public class Model extends PApplet{
         
         // Input fields
         // Particles
-        inputBoxs[0] = new InputBox(20,20,100,40,"#Particles",3);
+        inputBoxs[0] = new InputBox(20,20,100,40,"#Iterations",3);
         // Chords
         inputBoxs[1] = new InputBox(140,20,100,40,"#Chords",1000);
     }
     
     public void draw(){
-    	background(130);
+    	background(255);
     	stroke(0);
     	
     	if(buttons[2].state) {
     		fileHandler.newFile();
-    		iterations = 50;
+    		runs = 1;
     		createNewSim();
     		buttons[2].toggleState();
     	}
@@ -72,7 +77,7 @@ public class Model extends PApplet{
     	}
     	if(buttons[4].state) {
     		fileHandler.newFile();
-    		iterations = 50;
+    		runs = 1;
     		test();
     		buttons[4].toggleState();
     	}
@@ -109,7 +114,7 @@ public class Model extends PApplet{
     	}
     	stroke(0);
     	strokeWeight(1);
-    	circle(offsetX, offsetY, 2 * sim.getRadius());
+    	circle(offsetX, offsetY, 2 * sim.getRadius() * scale);
     	
     	if(graphics) {
 	    	for(Chord c : sim.getChords()) {
@@ -122,21 +127,22 @@ public class Model extends PApplet{
 	    				stroke(0);
 	    			}
 	    		}
-	    		line((float) (offsetX + c.getX1()), (float) (offsetY + c.getY1()), (float) (offsetX + c.getX2()), (float) (offsetY + c.getY2()));
+	    		line((float) (offsetX + c.getX1() * scale), (float) (offsetY + c.getY1() * scale),
+	    			 (float) (offsetX + c.getX2() * scale), (float) (offsetY + c.getY2() * scale));
 	    	}
     	}
     	for(Particle p : sim.getParticles()) {
     		noFill();
     		strokeWeight(1);
     		stroke(255,0,0);
-    		circle(offsetX + p.getX(), offsetY + p.getY(), (float) (p.getR() * 2));
+    		circle(offsetX + p.getX() * scale, offsetY + p.getY() * scale, (float) (p.getR() * 2 * scale));
     	}
     	
     	
     	noFill();
     	stroke(0);
     	strokeWeight(1);
-    	circle(offsetX, offsetY, 2 * sim.getRadius());
+    	circle(offsetX, offsetY, (float) (2 * sim.getRadius() * scale));
     	
     	if(buttons[0].state) {
     		if(!sim.complete) {
@@ -147,6 +153,7 @@ public class Model extends PApplet{
     			createNewSim();
     			if(iterations == runs) { complete = true; }
     		} else if (complete) {
+    			System.out.println(runs+"/"+iterations);
     			fileHandler.saveData();
     			complete = false;
     		}
@@ -154,7 +161,12 @@ public class Model extends PApplet{
     }
     
     public void createNewSim() {
-    	int c, p;
+    	int c;
+    	if(inputBoxs[0].value.length() == 0) {
+    		iterations = 1;
+    	} else {
+    		iterations = inputBoxs[0].getValue();
+    	}
     	if(inputBoxs[1].value.length() == 0) {
     		c = 0;
     	} else {
@@ -162,29 +174,35 @@ public class Model extends PApplet{
     		if(c > 1000) { graphics = false; } else { graphics = true; }
     	}
     	
-    	if(inputBoxs[0].value.length() == 0) {
-    		p = 0;
-    	} else {
-    		p = inputBoxs[0].getValue();
-    	}
-    	
-    	System.out.println("\nNew simulation started;\n #Particles: " + p + "\n #Chords:    " + c);
-    	sim = new Simulation(this, height / 2 - 5, c, p, distances);
-    	double r = sim.getParticles()[0].distance(sim.getParticles()[1]);
-    	double e = sim.calculateLegalRatio(); 
-    	double d = sim.calculateDerivative();
-    	
-    	String[] a = {Double.toString(r), Double.toString(e), Double.toString(d)};
-    	addData(a);
+    	System.out.println("\nNew simulation started;\n #Iterations: " + iterations + "\n #Chords:     " + c);
+    	sim = new Simulation(this, modelRadius, c, distances);
     }
     
     public void test() {
-    	new BertrandMethodTest(this).update();
+    	int c;
+    	if(inputBoxs[0].value.length() == 0) {
+    		iterations = 1;
+    	} else {
+    		iterations = inputBoxs[0].getValue();
+    	}
+    	if(inputBoxs[1].value.length() == 0) {
+    		c = 0;
+    	} else {
+    		c = inputBoxs[1].getValue();
+    		if(c > 1000) { graphics = false; } else { graphics = true; }
+    	}
+    	System.out.println("Method 1");
+    	new BertrandMethodTest(this, 1, modelRadius, c, distances, iterations).methodTest();
     	fileHandler.saveData();
+    	fileHandler.newFile();
+    	System.out.println("Method 2");
+    	new BertrandMethodTest(this, 2, modelRadius, c, distances, iterations).methodTest();
+    	fileHandler.saveData();
+    	fileHandler.newFile();
     }
     
-    public void addData(String[] data) {
-    	fileHandler.addDataLine(data);
+    public void addData(String[] d) {
+    	fileHandler.addDataLine(d);
     }
     
     public void mousePressed() {
