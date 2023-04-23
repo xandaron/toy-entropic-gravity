@@ -55,7 +55,7 @@ public class Model extends PApplet{
         
         // Input fields
         // Particles
-        inputBoxs[0] = new InputBox(20,20,100,40,"#Iterations",3);
+        inputBoxs[0] = new InputBox(20,20,100,40,"#Iterations",4);
         // Chords
         inputBoxs[1] = new InputBox(140,20,100,40,"#Chords",1000);
     }
