@@ -54,8 +54,8 @@ public class Model extends PApplet{
         buttons[4] = new Button(20, height - 120, 100, 40, color(138, 233, 255), "Test");
         
         // Input fields
-        // Particles
-        inputBoxs[0] = new InputBox(20,20,100,40,"#Iterations",4);
+        // Iterations
+        inputBoxs[0] = new InputBox(20,20,100,40,"#Iterations",5);
         // Chords
         inputBoxs[1] = new InputBox(140,20,100,40,"#Chords",1000);
     }

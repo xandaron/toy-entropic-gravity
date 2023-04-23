@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.loadtxt('../Data/230406124120.csv', delimiter=',')
+data = np.loadtxt('./output/230423162640.csv', delimiter=',')
 
 omit = np.asarray(data[:,1]>=0).nonzero()
 data = np.delete(data, omit, axis=0)
