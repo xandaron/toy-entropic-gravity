@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.loadtxt('./output/230423162640.csv', delimiter=',')
+data = np.loadtxt('./output/230423191100.csv', delimiter=',')
 
 omit = np.asarray(data[:,1]>=0).nonzero()
 data = np.delete(data, omit, axis=0)
@@ -22,8 +22,8 @@ ax[0].set_xlabel('ln(x)')
 ax[0].set_ylabel('|ln(S\'(x))|')
 print(f'm = {m}\nc = {c}')
 
-ax[1].scatter(x, data[:,2], c=x)
-ax[1].set_title("Entropy(S) vs Distance(x)")
-ax[1].set_xlabel("Distance(x)")
-ax[1].set_ylabel("Entropy(S)")
+ax[0].scatter(x, data[:,2], c=x)
+ax[0].set_title("Entropy(S) vs Distance(x)")
+ax[0].set_xlabel("Distance(x)")
+ax[0].set_ylabel("Entropy(S)")
 plt.show()

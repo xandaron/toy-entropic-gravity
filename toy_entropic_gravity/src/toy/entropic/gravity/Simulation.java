@@ -3,12 +3,12 @@ import java.util.Random;
 
 public class Simulation {
 	
-	static int distances = 20;
-	static int iterations = 100;
+	static int distances = 10;
+	static int iterations = 1000;
 	static int run = 0;
 	static int counter = 0;
 	
-	static int numChords = 10000000;
+	static int numChords = 100000;
 	static Particle[] particles = new Particle[2];
 	
 	static float radius = 1000f;
